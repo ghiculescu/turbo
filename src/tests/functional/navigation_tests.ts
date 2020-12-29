@@ -115,6 +115,15 @@ export class NavigationTests extends TurboDriveTestCase {
     this.assert.equal(await this.pathname, "/src/tests/fixtures/one.html")
     this.assert.equal(await this.visitAction, "restore")
   }
+
+  async "test skip link with hash-only path"() {
+    await this.clickSelector('a[href="#main"]')
+    await this.nextBeat
+
+    this.assert.equal(await this.pathname, "/src/tests/fixtures/navigation.html")
+    this.assert.equal(await this.hash, "#main")
+    this.assert(await this.isScrolledToSelector("#main"))
+  }
 }
 
 NavigationTests.registerSuite()
