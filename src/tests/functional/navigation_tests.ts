@@ -116,6 +116,25 @@ export class NavigationTests extends TurboDriveTestCase {
     this.assert.equal(await this.pathname, "/src/tests/fixtures/one.html")
     this.assert.equal(await this.visitAction, "restore")
   }
+
+  async "test lazy loading within a details element"() {
+    await this.nextBeat
+
+    const frameContents = "#loading-lazy turbo-frame h2"
+    this.assert.notOk(await this.hasSelector(frameContents))
+
+    await this.clickSelector("#loading-lazy summary")
+    await this.scrollToSelector("#loading-lazy")
+    await this.nextBeat
+
+    const contents = await this.querySelector(frameContents)
+    this.assert.equal(await contents.getVisibleText(), "Hello from a frame")
+  }
+
+  async "test eager loading within a details element"() {
+    await this.nextBeat
+    this.assert.ok(await this.hasSelector("#loading-eager turbo-frame form"))
+  }
 }
 
 NavigationTests.registerSuite()

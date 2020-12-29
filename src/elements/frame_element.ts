@@ -1,6 +1,8 @@
 import { FetchResponse } from "../http/fetch_response"
 import { FrameController } from "../core/frames/frame_controller"
 
+export enum FrameLoadingStyle { eager = "eager", lazy = "lazy" }
+
 export class FrameElement extends HTMLElement {
   readonly controller: FrameController
 
@@ -22,7 +24,7 @@ export class FrameElement extends HTMLElement {
   }
 
   attributeChangedCallback() {
-    if (this.src && this.isActive) {
+    if (this.src && this.isActive && this.loading == FrameLoadingStyle.eager) {
       const value = this.controller.visit(this.src)
       Object.defineProperty(this, "loaded", { value, configurable: true })
     }
@@ -41,6 +43,18 @@ export class FrameElement extends HTMLElement {
       this.setAttribute("src", value)
     } else {
       this.removeAttribute("src")
+    }
+  }
+
+  get loading(): FrameLoadingStyle {
+    return frameLoadingStyleFromString(this.getAttribute("loading") || "")
+  }
+
+  set loading(value: FrameLoadingStyle) {
+    if (value) {
+      this.setAttribute("loading", value)
+    } else {
+      this.removeAttribute("loading")
     }
   }
 
@@ -78,6 +92,13 @@ export class FrameElement extends HTMLElement {
 
   get isPreview() {
     return this.ownerDocument?.documentElement?.hasAttribute("data-turbo-preview")
+  }
+}
+
+function frameLoadingStyleFromString(style: string) {
+  switch (style.toLowerCase()) {
+    case "lazy":  return FrameLoadingStyle.lazy
+    default:      return FrameLoadingStyle.eager
   }
 }
 
